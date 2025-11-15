@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  frontend:
+    image: alejandrocastor/front-napolitech:latest   # sua imagem publicada no Docker Hub
+    container_name: frontend-app
+    restart: always
+    ports:
+      - "80:80"   # expõe a porta 80 do container para a porta 80 da EC2
