@@ -199,3 +199,28 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 **💡 Dica**: Sempre revise o `terraform plan` antes de aplicar mudanças em produção!
 
 Para dúvidas ou suporte, abra uma issue no repositório.
+
+
+
+tratando erros:
+
+
+╷
+│ Error: importing EC2 Key Pair (nginx-lb-key): InvalidKeyPair.Duplicate: The keypair already exists        
+│       status code: 400, request id: 8ed108fb-5c3e-481b-acdc-86f63ccd2f04
+│
+│   with aws_key_pair.generated,
+│   on keypair.tf line 8, in resource "aws_key_pair" "generated":
+│    8: resource "aws_key_pair" "generated" {
+
+
+O erro indica que o par de chaves EC2 chamado nginx-lb-key já existe na sua conta AWS, então o Terraform não pode criar outro igual.
+
+Para resolver, você pode:
+
+Importar o par de chaves existente para o estado do Terraform
+Execute no PowerShell:
+
+
+
+terraform import aws_key_pair.generated nginx-lb-key

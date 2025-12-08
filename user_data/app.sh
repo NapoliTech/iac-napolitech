@@ -19,21 +19,7 @@ for i in {1..30}; do
   sleep 5
 done
 
-echo "Testando saída para internet..."
-for i in {1..30}; do
-  if curl -s --connect-timeout 3 http://google.com >/dev/null; then
-    echo "Conectividade OK!"
-    break
-  fi
-  echo "Sem saída ainda... tentativa $i"
-  sleep 5
-done
 
-# Falha final
-if ! curl -s --connect-timeout 3 http://google.com >/dev/null; then
-  echo "ERRO: Sem conectividade após aguardar 5 minutos."
-  exit 1
-fi
 
 # ================================
 # 2. Forçar APT a usar IPv4

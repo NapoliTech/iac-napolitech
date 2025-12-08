@@ -1,6 +1,4 @@
 #!/bin/bash
-
-# sobe o front end do napolitech
 set -e
 
 apt-get update -y
@@ -14,20 +12,14 @@ cd /home/ubuntu/app
 
 cat > docker-compose.yml <<'EOL'
 version: "3.8"
+
 services:
   frontend:
-    image: alejandrocastor/front-napolitech:1.0.2
+    image: alejandrocastor/admin:0.0.3
     container_name: frontend-app
     restart: always
     ports:
-      - "3000:80"
-
-    networks:
-      - network-napolitech
-
-networks:
-  network-napolitech:
-    driver: bridge
+      - "3001:80"
 EOL
 
 docker-compose up -d
@@ -40,7 +32,7 @@ upstream backend {
 }
 
 upstream frontend {
-    server 127.0.0.1:3000;
+    server 127.0.0.1:3001;
 }
 
 server {
