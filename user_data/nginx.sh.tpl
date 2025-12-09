@@ -37,6 +37,8 @@ cat > /etc/nginx/sites-available/default <<'NGINX'
 upstream backend {
     server ${app1_ip}:8080;
     server ${app1_ip}:8080;
+
+    
 }
 
 upstream frontend {
