@@ -1,1 +1,4 @@
 P@ssw0rd
+
+
+curl http://{ip}/swagger-ui/index.html

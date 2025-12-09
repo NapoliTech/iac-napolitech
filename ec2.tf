@@ -68,13 +68,19 @@ resource "aws_instance" "app_server_1" {
   vpc_security_group_ids = [aws_security_group.private_sg.id]
   key_name               = aws_key_pair.generated.key_name
 
-  user_data = file("${path.module}/user_data/app.sh")
-
   tags = {
     Name = "${var.project_name}-app-1"
   }
 
-  depends_on = [aws_nat_gateway.nat_gw]
+  user_data = templatefile("${path.module}/user_data/app.sh.tpl", {
+    db_host     = aws_db_instance.mysql.address,
+    db_port     = 3306,
+    db_username = var.db_username,
+    db_password = var.db_password,
+    db_name     = var.db_name
+  })
+
+  depends_on = [aws_nat_gateway.nat_gw, aws_db_instance.mysql]
 }
 
 resource "aws_instance" "app_server_2" {
@@ -84,13 +90,19 @@ resource "aws_instance" "app_server_2" {
   vpc_security_group_ids = [aws_security_group.private_sg.id]
   key_name               = aws_key_pair.generated.key_name
 
-  user_data = file("${path.module}/user_data/app.sh")
-
   tags = {
     Name = "${var.project_name}-app-2"
   }
 
-  depends_on = [aws_nat_gateway.nat_gw]
+  user_data = templatefile("${path.module}/user_data/app.sh.tpl", {
+    db_host     = aws_db_instance.mysql.address,
+    db_port     = 3306,
+    db_username = var.db_username,
+    db_password = var.db_password,
+    db_name     = var.db_name
+  })
+
+  depends_on = [aws_nat_gateway.nat_gw, aws_db_instance.mysql]
 }
 
 resource "aws_instance" "nginx_server_admin" {
@@ -148,13 +160,19 @@ resource "aws_instance" "app_server_1_admin" {
   vpc_security_group_ids = [aws_security_group.private_sg.id]
   key_name               = aws_key_pair.generated.key_name
 
-  user_data = file("${path.module}/user_data/app.sh")
-
   tags = {
     Name = "${var.project_name}-app-1-admin"
   }
 
-  depends_on = [aws_nat_gateway.nat_gw]
+  user_data = templatefile("${path.module}/user_data/app.sh.tpl", {
+    db_host     = aws_db_instance.mysql.address,
+    db_port     = 3306,
+    db_username = var.db_username,
+    db_password = var.db_password,
+    db_name     = var.db_name
+  })
+
+  depends_on = [aws_nat_gateway.nat_gw, aws_db_instance.mysql]
 }
 
 resource "aws_instance" "app_server_2_admin" {
@@ -164,11 +182,17 @@ resource "aws_instance" "app_server_2_admin" {
   vpc_security_group_ids = [aws_security_group.private_sg.id]
   key_name               = aws_key_pair.generated.key_name
 
-  user_data = file("${path.module}/user_data/app.sh")
-
   tags = {
     Name = "${var.project_name}-app-2-admin"
   }
 
-  depends_on = [aws_nat_gateway.nat_gw]
+  user_data = templatefile("${path.module}/user_data/app.sh.tpl", {
+    db_host     = aws_db_instance.mysql.address,
+    db_port     = 3306,
+    db_username = var.db_username,
+    db_password = var.db_password,
+    db_name     = var.db_name
+  })
+
+  depends_on = [aws_nat_gateway.nat_gw, aws_db_instance.mysql]
 }

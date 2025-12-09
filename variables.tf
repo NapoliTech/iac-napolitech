@@ -17,3 +17,33 @@ variable "subnet_cidr" {
 variable "instance_type" {
   default = "t2.micro"
 }
+
+variable "db_username" {
+  description = "Database master username"
+  default     = "napolitech"
+}
+
+variable "db_password" {
+  description = "Database master password"
+  default     = "napolitech_dev"
+}
+
+variable "db_name" {
+  description = "Database name"
+  default     = "pizzaria_db"
+}
+
+variable "db_allocated_storage" {
+  description = "Allocated storage for RDS (GB)"
+  default     = 20
+}
+
+variable "db_instance_class" {
+  description = "RDS instance class"
+  default     = "db.t3.micro"
+}
+
+variable "db_engine_version" {
+  description = "MySQL engine version"
+  default     = "8.0"
+}
