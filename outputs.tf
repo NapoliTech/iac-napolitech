@@ -89,3 +89,16 @@ output "ssh_private_key_path" {
   value       = local_file.private_key.filename
   description = "------ Caminho para a chave privada SSH ------"
 }
+
+# ----------------------------
+# 🐇 RABBITMQ
+# ----------------------------
+output "rabbitmq_private_ip" {
+  value       = aws_instance.rabbitmq.private_ip
+  description = "------ IP Privado do RabbitMQ centralizado ------"
+}
+
+output "rabbitmq_management_url" {
+  value       = "http://${aws_instance.rabbitmq.private_ip}:15672/"
+  description = "------ URL do painel de gerenciamento RabbitMQ (acessível via jump/peers) ------"
+}

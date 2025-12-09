@@ -28,7 +28,7 @@ docker-compose up -d
 cat > /etc/nginx/sites-available/default <<'NGINX'
 upstream backend {
     server ${app1_ip}:8080;
-    server ${app2_ip}:8080;
+    server ${app1_ip}:8080;
 }
 
 upstream frontend {

@@ -47,3 +47,13 @@ variable "db_engine_version" {
   description = "MySQL engine version"
   default     = "8.0"
 }
+
+variable "rabbitmq_user" {
+  description = "Usuário admin para RabbitMQ"
+  default     = "admin"
+}
+
+variable "rabbitmq_pass" {
+  description = "Senha admin para RabbitMQ"
+  default     = "napolitech"
+}

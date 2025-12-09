@@ -13,6 +13,25 @@ data "aws_ami" "ubuntu" {
   }
 }
 
+resource "aws_instance" "rabbitmq" {
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = "t3.medium"
+  subnet_id              = aws_subnet.private_1.id
+  vpc_security_group_ids = [aws_security_group.rabbitmq_sg.id]
+  key_name               = aws_key_pair.generated.key_name
+
+  tags = {
+    Name = "${var.project_name}-rabbitmq"
+  }
+
+  user_data = templatefile("${path.module}/user_data/rabbitmq.sh.tpl", {
+    rabbitmq_user = var.rabbitmq_user,
+    rabbitmq_pass = var.rabbitmq_pass
+  })
+
+  depends_on = [aws_nat_gateway.nat_gw]
+}
+
 resource "aws_instance" "nginx_server" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t3.medium"
@@ -77,7 +96,10 @@ resource "aws_instance" "app_server_1" {
     db_port     = 3306,
     db_username = var.db_username,
     db_password = var.db_password,
-    db_name     = var.db_name
+    db_name     = var.db_name,
+    rabbitmq_host = aws_instance.rabbitmq.private_ip,
+    rabbitmq_user = var.rabbitmq_user,
+    rabbitmq_pass = var.rabbitmq_pass
   })
 
   depends_on = [aws_nat_gateway.nat_gw, aws_db_instance.mysql]
@@ -99,7 +121,10 @@ resource "aws_instance" "app_server_2" {
     db_port     = 3306,
     db_username = var.db_username,
     db_password = var.db_password,
-    db_name     = var.db_name
+    db_name     = var.db_name,
+    rabbitmq_host = aws_instance.rabbitmq.private_ip,
+    rabbitmq_user = var.rabbitmq_user,
+    rabbitmq_pass = var.rabbitmq_pass
   })
 
   depends_on = [aws_nat_gateway.nat_gw, aws_db_instance.mysql]
@@ -169,7 +194,10 @@ resource "aws_instance" "app_server_1_admin" {
     db_port     = 3306,
     db_username = var.db_username,
     db_password = var.db_password,
-    db_name     = var.db_name
+    db_name     = var.db_name,
+    rabbitmq_host = aws_instance.rabbitmq.private_ip,
+    rabbitmq_user = var.rabbitmq_user,
+    rabbitmq_pass = var.rabbitmq_pass
   })
 
   depends_on = [aws_nat_gateway.nat_gw, aws_db_instance.mysql]
@@ -191,7 +219,10 @@ resource "aws_instance" "app_server_2_admin" {
     db_port     = 3306,
     db_username = var.db_username,
     db_password = var.db_password,
-    db_name     = var.db_name
+    db_name     = var.db_name,
+    rabbitmq_host = aws_instance.rabbitmq.private_ip,
+    rabbitmq_user = var.rabbitmq_user,
+    rabbitmq_pass = var.rabbitmq_pass
   })
 
   depends_on = [aws_nat_gateway.nat_gw, aws_db_instance.mysql]

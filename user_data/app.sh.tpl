@@ -85,42 +85,18 @@ services:
       MAIL_PASSWORD: "gycihyclbdscmhor"
       MAIL_SMTP_AUTH: "true"
       MAIL_SMTP_STARTTLS: "true"
-      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_HOST: "${rabbitmq_host}"
       RABBITMQ_PORT: "5672"
-      RABBITMQ_DEFAULT_USER: "admin"
-      RABBITMQ_DEFAULT_PASS: "napolitech"
+      RABBITMQ_DEFAULT_USER: "${rabbitmq_user}"
+      RABBITMQ_DEFAULT_PASS: "${rabbitmq_pass}"
       BROKER_EXCHANGE_NAME: "napolitech-exchange"
       BROKER_QUEUE_NAME: "pedidos-queue"
       BROKER_ROUTING_KEY: "pedidos-routing-key"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
+    # RabbitMQ é agora um serviço centralizado; não depende de um container local
     networks:
       - network-napolitech
 
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    container_name: rabbitmq-napolitech
-    restart: always
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: napolitech
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-    healthcheck:
-      test: ["CMD-SHELL", "rabbitmqctl node_health_check"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
-      start_period: 20s
-    networks:
-      - network-napolitech
-
-volumes:
-  rabbitmq_data:
+  # RabbitMQ foi removido deste compose. O serviço usa um RabbitMQ centralizado
 EOL
 
 echo "=== Subindo containers ==="
