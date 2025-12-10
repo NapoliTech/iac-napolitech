@@ -1,0 +1,187 @@
+========================================
+GUIA: ACESSAR E GERENCIAR O BANCO RDS
+========================================
+
+📋 INFORMAÇÕES DO BANCO DE DADOS
+---------------------------------
+⚠️  IMPORTANTE: O host muda a cada deploy! Use o comando abaixo para obter o endpoint atual:
+
+# No seu computador, na pasta do Terraform:
+terraform output db_endpoint
+
+# Exemplo de resultado:
+# "nginx-lb-mysql.cx2yamq2khi1.us-east-1.rds.amazonaws.com"
+
+Porta: 3306
+Banco: pizzaria_db
+Usuário: napolitech
+Senha: napolitech_dev
+
+
+🔐 PASSO 1: OBTER INFORMAÇÕES DO TERRAFORM
+-------------------------------------------
+# No seu computador, na pasta do Terraform:
+terraform output nginx_public_ip
+terraform output db_endpoint
+
+# Anote os valores retornados!
+
+
+🔐 PASSO 2: CONECTAR NO NGINX (JUMP SERVER)
+--------------------------------------------
+# No seu computador local (PowerShell):
+# Substitua <NGINX_IP> pelo IP obtido no passo anterior
+ssh -i nginx-lb-key.pem ubuntu@<NGINX_IP>
+
+# Exemplo:
+# ssh -i nginx-lb-key.pem ubuntu@98.89.25.215
+
+
+🖥️ PASSO 3: ACESSAR O BACKEND PRIVADO
+--------------------------------------
+# Dentro do Nginx, conecte ao servidor backend privado:
+# Para ver os IPs dos backends:
+terraform output app_server_1_private_ip
+terraform output app_server_2_private_ip
+
+ssh ubuntu@<IP_BACKEND>
+
+📦 PASSO 4: INSTALAR O MYSQL CLIENT
+------------------------------------
+# Dentro do servidor backend privado:
+sudo apt update
+sudo apt install mysql-client-core-8.0 -y
+
+
+🔌 PASSO 5: CONECTAR AO RDS
+----------------------------
+# Substitua <DB_ENDPOINT> pelo endpoint obtido no Passo 1
+mysql -h <DB_ENDPOINT> -P 3306 -u napolitech -pnapolitech_dev
+
+# Exemplo:
+# mysql -h nginx-lb-mysql.cx2yamq2khi1.us-east-1.rds.amazonaws.com -P 3306 -u napolitech -pnapolitech_dev
+
+🔌 PASSO 4: CONECTAR AO RDS
+🗑️ PASSO 6: LIMPAR TODOS OS DADOS (TRUNCATE)
+mysql -h nginx-lb-mysql.cx2yamq2khi1.us-east-1.rds.amazonaws.com -P 3306 -u napolitech -pnapolitech_dev
+
+
+🗑️ PASSO 5: LIMPAR TODOS OS DADOS (TRUNCATE)
+----------------------------------------------
+# Dentro do MySQL:
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE item_pedido;
+TRUNCATE TABLE pedidos;
+TRUNCATE TABLE password_reset_token;
+TRUNCATE TABLE estoque_produtos;
+TRUNCATE TABLE endereco;
+TRUNCATE TABLE usuarios_cadastrados;
+✅ PASSO 7: VERIFICAR SE ESTÁ VAZIO
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+✅ PASSO 6: VERIFICAR SE ESTÁ VAZIO
+------------------------------------
+SELECT COUNT(*) FROM estoque_produtos;
+SELECT COUNT(*) FROM usuarios_cadastrados;
+SHOW TABLES;
+
+
+📝 PASSO 8: POPULAR COM DADOS MOCK
+-----------------------------------
+# Inserir usuário de teste:
+INSERT INTO usuarios_cadastrados (
+    id_usuario, nome, email, senha, cpf, confirmar_senha, telefone, data_nasc, tipo_usuario, pedidos
+) VALUES (
+    1, 'Marcos Paulo', 'marcos@gmail.com', 'P@ssw0rd', '123.123.123-11', 'P@ssw0rd', '(11) 99999-9999', '1989-01-10', 'CLIENTE', 0
+);
+
+# Inserir endereço:
+INSERT INTO endereco (
+    id, rua, bairro, numero, complemento, cidade, estado, cep, usuario_id
+) VALUES (
+    1, 'Rua Haddock Lobo', 'Consolação', 595, 'Digital Building', 'São Paulo', 'SP', '01414-001', 1
+);
+
+# Inserir produtos (Pizzas Salgadas):
+INSERT INTO estoque_produtos (nome, preco, quantidade_estoque, ingredientes, categoria_produto) VALUES
+('Pizza de Calabresa', 39.90, 10, 'Calabresa, Cebola, Orégano, Queijo Mussarela', 0),
+('Pizza Portuguesa', 42.90, 10, 'Presunto, Ovo, Cebola, Azeitona, Queijo Mussarela, Orégano', 0),
+('Pizza de Frango com Catupiry', 44.90, 10, 'Frango desfiado, Catupiry, Queijo Mussarela, Orégano', 0),
+('Pizza Quatro Queijos', 49.90, 10, 'Mussarela, Gorgonzola, Parmesão, Catupiry', 0),
+('Pizza Margherita', 39.90, 10, 'Molho de tomate, Mussarela, Manjericão fresco', 0),
+('Pizza de Pepperoni', 47.90, 10, 'Pepperoni, Queijo Mussarela, Molho de tomate', 0),
+('Pizza de Carne Seca com Catupiry', 52.90, 10, 'Carne seca desfiada, Catupiry, Cebola roxa, Mussarela', 0),
+('Pizza Vegetariana', 45.90, 10, 'Tomate, Pimentão, Cebola, Brócolis, Azeitona, Mussarela', 0),
+('Pizza de Bacon', 46.90, 10, 'Bacon crocante, Mussarela, Molho de tomate', 0),
+('Pizza de Camarão', 59.90, 10, 'Camarão, Catupiry, Mussarela, Orégano', 0);
+
+# Inserir produtos (Pizzas Doces):
+INSERT INTO estoque_produtos (nome, preco, quantidade_estoque, ingredientes, categoria_produto) VALUES
+('Pizza de Chocolate', 39.90, 10, 'Chocolate ao leite, Granulado', 1),
+('Pizza de Brigadeiro', 42.90, 10, 'Chocolate, Granulado, Leite condensado', 1),
+('Pizza de Banana com Canela', 37.90, 10, 'Banana, Açúcar, Canela, Chocolate branco', 1),
+('Pizza Romeu e Julieta', 41.90, 10, 'Goiabada, Queijo Minas', 1);
+
+# Inserir produtos (Bebidas):
+INSERT INTO estoque_produtos (nome, preco, quantidade_estoque, ingredientes, categoria_produto) VALUES
+('Coca-Cola Lata 350Ml', 5.90, 25, '', 6),
+('Guaraná Lata 350Ml', 5.50, 20, '', 6);
+
+
+🔍 PASSO 9: VERIFICAR OS DADOS INSERIDOS
+-----------------------------------------
+SELECT * FROM estoque_produtos ORDER BY categoria_produto, nome;
+SELECT COUNT(*) FROM estoque_produtos;
+SELECT * FROM usuarios_cadastrados;
+
+
+📊 CATEGORIAS DE PRODUTOS
+--------------------------
+0 = PIZZA (Salgada)
+1 = PIZZA_DOCE
+6 = BEBIDAS / REFRIGERANTE
+
+
+🚪 PASSO 10: SAIR DO MYSQL
+--------------------------
+exit;
+
+
+🔄 OBSERVAÇÃO IMPORTANTE
+------------------------
+A aplicação Spring Boot tem um serviço DadosMock (mock.sh.tpl) que popula 
+automaticamente o banco com dados ao iniciar. Se preferir usar isso:
+
+1. Certifique-se de que o banco está vazio
+2. Reinicie o container do backend:
+   sudo docker restart backend-napolitech
+
+3. Verifique os logs:
+   sudo docker logs -f backend-napolitech
+
+
+📌 COMANDOS RÁPIDOS
+-------------------
+# Ver todos os containers:
+sudo docker ps -a
+
+# Ver logs do backend:
+sudo docker logs backend-napolitech
+
+# Reiniciar backend:
+sudo docker restart backend-napolitech
+
+# Obter endpoints atuais:
+terraform output db_endpoint
+terraform output nginx_public_ip
+
+# Conectar ao MySQL direto (substitua <DB_ENDPOINT>):
+mysql -h <DB_ENDPOINT> -P 3306 -u napolitech -pnapolitech_dev
+
+
+========================================
+FIM DO GUIA
+========================================

@@ -92,11 +92,58 @@ services:
       BROKER_EXCHANGE_NAME: "napolitech-exchange"
       BROKER_QUEUE_NAME: "pedidos-queue"
       BROKER_ROUTING_KEY: "pedidos-routing-key"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+    depends_on:
+      - redis
     # RabbitMQ é agora um serviço centralizado; não depende de um container local
     networks:
       - network-napolitech
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    command:
+      - redis-server
+      - --maxmemory
+      - 512mb
+      - --maxmemory-policy
+      - allkeys-lfu
+      - --save
+      - "60"
+      - "1"
+      - --loglevel
+      - warning
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - network-napolitech
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping || exit 1" ]
+      interval: 10s
+      timeout: 2s
+      retries: 5
+      start_period: 10s
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+    networks:
+      - network-napolitech
+    volumes:
+      - redisinsight_data:/data
+
   # RabbitMQ foi removido deste compose. O serviço usa um RabbitMQ centralizado
+
+volumes:
+  redis_data:
+  redisinsight_data:
 EOL
 
 echo "=== Subindo containers ==="
